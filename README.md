@@ -10,6 +10,24 @@ This code relies on the following Python packages:
 
 ---
 
+## 🔧 Installation
+
+You can install the required dependencies using pip:
+
+```bash
+pip install numpy scipy h5py
+```
+
+Clone the repository and install locally:
+
+```bash
+git clone https://github.com/yourusername/pyGALIC.git
+cd pyGALIC
+pip install .
+```
+
+---
+
 ## 🔧 Usage
 
 ### 1. Define a Density Profile
