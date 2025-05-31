@@ -1,65 +1,74 @@
-Initial Condition Generator with pyGALIC
-📦 Dependencies
+# Initial Condition Generator with `pyGALIC`
+
+## 📦 Dependencies
+
 This code relies on the following Python packages:
 
-numpy
+- `numpy`
+- `scipy`
+- `h5py`
 
-scipy
+---
 
-h5py
+## 🔧 Usage
 
-🔧 Usage
-1. Define a Density Profile
-To sample ICs for a certain particle species, first define the desired density distribution. For example, for an NFW profile:
+### 1. Define a Density Profile
 
-python
-Kopieren
-Bearbeiten
+To sample ICs for a certain particle species, first define the desired density distribution. For example, for an **NFW** profile:
+
+```python
 def NFW(r, r_s, rho_s):
     x = r / r_s
     return rho_s / (x * (1 + x)**2)
-The first argument must be the radius in your desired units.
-The profile must be non-zero everywhere, and ensure that ρ(r)·r² does not diverge within the sampling radius.
+```
 
-2. Initialize the IC Generator
-python
-Kopieren
-Bearbeiten
+> The first argument must be the radius in your desired units.  
+> The profile must be non-zero everywhere, and ensure that ρ(r)·r² does not diverge within the sampling radius.
+
+---
+
+### 2. Initialize the IC Generator
+
+```python
 from pyGALIC import IC
 ic_DM = IC(NFW, species=1, args=(10, 1), G=43000)
-species=1: DM particles (per Gadget-3 convention)
+```
 
-species=0: Gas particles
+- `species=1`: DM particles (per Gadget-3 convention)
+- `species=0`: Gas particles
+- `args`: Tuple of arguments for the profile function (after `r`)
+- `G`: Gravitational constant (default is Gadget-3 units)
 
-args: Tuple of arguments for the profile function (after r)
+---
 
-G: Gravitational constant (default is Gadget-3 units)
+### 3. Sample the Initial Conditions
 
-3. Sample the Initial Conditions
-python
-Kopieren
-Bearbeiten
+```python
 data = ic_DM.sample(rmax=100, N_part=int(1e7), N_table=1000, mirrored=False)
-rmax: Maximum sampling radius
+```
 
-N_part: Number of particles
+- `rmax`: Maximum sampling radius
+- `N_part`: Number of particles
+- `N_table`: Number of entries in the lookup table
+- `mirrored`: Whether to sample mirrored particle pairs (makes total momentum exactly zero)
 
-N_table: Number of entries in the lookup table
+---
 
-mirrored: Whether to sample mirrored particle pairs (makes total momentum exactly zero)
+### 4. Save Data in HDF5 Format
 
-4. Save Data in HDF5 Format
-python
-Kopieren
-Bearbeiten
+```python
 from pyGALIC import write_IC_hdf5
 filename = 'halo'
 write_IC_hdf5(filename, [data])
-🌌 Multiple Species in Equilibrium
-1. Define Density Profiles
-python
-Kopieren
-Bearbeiten
+```
+
+---
+
+## 🌌 Multiple Species in Equilibrium
+
+### 1. Define Density Profiles
+
+```python
 # Gas: Hernquist profile
 rho_s_gas = 3.5e-2
 r_s_gas = 0.77
@@ -73,21 +82,27 @@ r_s_DM = 9.1
 def density_DM(r):
     x = r / r_s_DM
     return rho_s_DM / (x * (1 + x)**2)
-2. Initialize ICs with External Potentials
-python
-Kopieren
-Bearbeiten
+```
+
+---
+
+### 2. Initialize ICs with External Potentials
+
+```python
 from pyGALIC import IC
 
 ic_DM = IC(density_DM, species=1, external_profile=density_gas)
 ic_gas = IC(density_gas, species=0, external_profile=density_DM)
-external_profile accounts for an external potential affecting the Jeans equation but does not contribute sampled particles.
-If it requires arguments beyond radius, pass them with external_args.
+```
 
-3. Sample and Save
-python
-Kopieren
-Bearbeiten
+> `external_profile` accounts for an external potential affecting the Jeans equation but does **not** contribute sampled particles.  
+> If it requires arguments beyond radius, pass them with `external_args`.
+
+---
+
+### 3. Sample and Save
+
+```python
 from pyGALIC import write_IC_hdf5
 
 N_part_DM = int(1e7)
@@ -99,3 +114,6 @@ data_DM = ic_DM.sample(N_part=N_part_DM, rmax=r_max_DM)
 data_gas = ic_gas.sample(N_part=N_part_gas, rmax=r_max_gas)
 
 write_IC_hdf5('halo', [data_DM, data_gas])
+```
+
+---
